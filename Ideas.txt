@@ -1,0 +1,17 @@
+Fridgester - A website utilizing the spoonacular API to allow users to generate possible recipes they can make at home based on ingredients already owned as well as generate a shopping list for what they might need based on a particular recipe.
+
+Create a user profile and allow users to add in favorite dishes
+Allow users to make a “fridge” list - Generates recipes cookable based on their fridge
+Generate a simple shopping list if a recipe is selected with an ingredient, not in a user’s fridge
+
+
+Spiked - A website utilizing the cocktailDB API to allow users to create their own cocktail recipes and share them with other users. 
+
+Allow a user to make a list of favorite recipes
+Generate their own recipe and share it with other users
+
+
+Game Pod - A website that utilizes the Twitter API and connects video game developers with a UI where they organize current projects and have a discussion board on each one that allows other developers to provide insight on particular concepts/design mechanics. 
+
+Users create game project discussion pages.
+Developer profiles show the user’s Twitter feed and allow other developers to interact with tweets.
