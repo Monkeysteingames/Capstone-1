@@ -14,18 +14,49 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
-    fridge_id = db.Column(db.Integer, db.ForeignKey(
-        'fridges.fridge_id', ondelete='CASCADE'), nullable=False)
+    avatar_img = db.Column(db.String)
+    bio = db.Column(db.String)
 
+    def __repr__(self):
+        return f"<User #{self.id}, {self.username}, {self.email}>"
 
-class Fridge(db.Model):
-    """Relationship table between our user and ingredients. Our fridge!"""
+    @classmethod
+    def signup(cls, username, email, password, avatar_img, bio):
+        """Sign up user.
 
-    __tablename__ = "fridges"
+        Hashes password and adds user to system.
+        """
 
-    id = db.Column(db.Integer, primary_key=True)
-    ing_id = db.Column(db.Integer, db.ForeignKey(
-        'ingredients.ing_id', ondelete='CASCADE'), nullable=False)
+        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+
+        user = User(
+            username=username,
+            email=email,
+            password=hashed_pwd,
+            avatar_img=avatar_img,
+            bio=bio,
+        )
+
+        db.session.add(user)
+        return user
+
+    @classmethod
+    def authenticate(cls, username, password):
+        """Find user with provide 'username' & 'password'. 
+
+        If user and pass match, returns that user object.
+
+        If can't find matching user or if password is wrong, returns False.
+        """
+
+        user = cls.query.filter_by(username=username).first()
+
+        if user:
+            is_auth = bcrypt.check_password_hash(user.password, password)
+            if is_auth:
+                return user
+
+        return False
 
 
 class Ingredient(db.Model):
@@ -34,13 +65,22 @@ class Ingredient(db.Model):
     __tablename__ = "ingredients"
 
     id = db.Column(db.Integer, primary_key=True)
-    fridge_id = db.Column(db.Integer, db.ForeignKey(
-        'users.fridge_id', ondelete='CASCADE'), nullable=False)
-
-    ing_id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String, nullable=False)
-    food_group = db.Column(db.String, nullable=False)
+    ing_id = db.Column(db.Integer, nullable=False)
+    food_group = db.Column(db.String)
     img = db.Column(db.String)
+
+
+class Fridge(db.Model):
+    """Relationship table between our user and ingredients. Our fridge!"""
+
+    __tablename__ = "fridges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'users.id', ondelete='CASCADE'), nullable=False)
+    ing_id = db.Column(db.Integer, db.ForeignKey(
+        'ingredients.id', ondelete='CASCADE'), nullable=False)
 
 
 def connect_db(app):

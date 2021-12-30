@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div>
+    <div class="card" style="width: 18rem;">
+        <img src="{{g.user.avatar_img}}" class="card-img-top" alt="users avatar image">
+        <div class="card-body">
+            <p class="card-text">{{g.user.bio}}</p>
+        </div>
+    </div>
+    <h1>Scrounging through {{g.user.username}}'s fridge..</h1>
+    <h2>Start discovering dishes to make with what you already have!</h2>
+</div>
+
+{% block fridge %}{% endblock %}
+
+{% endblock %}
