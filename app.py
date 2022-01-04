@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
-from forms import LoginForm, UserAddForm
-from models import User, Ingredient, connect_db, db
+from forms import LoginForm, UserAddForm, FridgeForm
+from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
 from key import API_SECRET_KEY, APP_CONFIG_KEY
 from sqlalchemy.exc import IntegrityError
+from fridge import check_for_fridge
 
 CURR_USER_KEY = "curr_user"
 
@@ -21,7 +22,7 @@ API_KEY = API_SECRET_KEY
 
 connect_db(app)
 
-################################
+######################################################################
 # user signup/login/logout
 
 
@@ -115,7 +116,49 @@ def logout():
 
     return redirect('/')
 
-#################################
+######################################################################
+# fridge routes
+
+
+@app.route('/fridge/create', methods=["POST"])
+def create_fridge():
+    """Create fridge with g.user_id and add to database"""
+    if g.user:
+        fridge = Fridge(user_id=g.user.id)
+        db.session.add(fridge)
+        db.session.commit()
+        flash(f"Fridge created for user #{g.user.id}", "success")
+        return redirect('/')
+    else:
+        flash("Please login first to create your fridge", "danger")
+        return redirect("/login")
+
+
+@app.route('/fridge/<int:fridge_id>/add', methods=["GET", "POST"])
+def add_to_fridge(fridge_id):
+    """Handle adding ingredient to fridge with id of fridge_id"""
+    form = FridgeForm()
+    fridge = Fridge.query.get_or_404(fridge_id)
+
+    if g.user:
+        if form.validate_on_submit():
+            fridge_ing = Fridge_Ingredients(
+                fridge_id=fridge_id, ing_id=form.ing_id.data, food_group=form.food_group.data, img=form.img.data)
+            db.session.add(fridge_ing)
+            db.session.commit()
+            return redirect(f"/fridge/{fridge_id}/add", form=form)
+    else:
+        flash("Please login first to create your fridge", "danger")
+        return redirect("/login")
+
+    return render_template('/fridge/fridge.html', form=form, fridge=fridge)
+
+
+@app.route('/fridge/<int:fridge_id>/remove', methods=["GET", "POST"])
+def remove_from_fridge(fridge_id):
+    """Handle remove ingredient from fridge with id of fridge_id."""
+
+#####################################################################
 # homepage routes
 
 
@@ -124,10 +167,14 @@ def homepage():
     """Show homepage
 
     - anon users: show landing page
-    - logged in: show user fridge
+    - logged in:
+        check if fridge exists:
+            - if it does: show user fridge
+            - if it does not: show button to create fridge
     """
     if g.user:
-        return render_template('home.html')
+        fridge = check_for_fridge(g.user.id)
+        return render_template('home.html', fridge=fridge)
     else:
         flash("Welcome!", "Success")
         return render_template('home-anon.html')

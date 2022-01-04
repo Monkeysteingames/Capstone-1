@@ -1,3 +1,5 @@
+# models for User, Fridge, Ingredients and method for db connection
+
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
@@ -67,20 +69,39 @@ class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     ing_id = db.Column(db.Integer, nullable=False)
-    food_group = db.Column(db.String)
-    img = db.Column(db.String)
+
+    def __repr__(self):
+        return f"<Ingredient ID#{self.ing_id}, {self.name}>"
 
 
 class Fridge(db.Model):
-    """Relationship table between our user and ingredients. Our fridge!"""
+    """Relationship table between our user and fridges."""
 
-    __tablename__ = "fridges"
+    __tablename__ = "user_fridges"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id', ondelete='CASCADE'), nullable=False)
+
+    def __repr__(self):
+        return f"<Fridge #{self.id}, User #{self.user_id}>"
+
+
+class Fridge_Ingredients(db.Model):
+    """Relationship table between our fridge and ingredients. Our fridge!"""
+
+    __tablename__ = "fridge_ingredients"
+
+    id = db.Column(db.Integer, primary_key=True)
+    fridge_id = db.Column(db.Integer, db.ForeignKey(
+        'user_fridges.id', ondelete='CASCADE'), nullable=False)
     ing_id = db.Column(db.Integer, db.ForeignKey(
         'ingredients.id', ondelete='CASCADE'), nullable=False)
+    food_group = db.Column(db.String)
+    img = db.Column(db.String)
+
+    def __repr__(self):
+        return f"<Ingredient #{self.ing_id}, stored in Fridge #{self.fridge_id}>"
 
 
 def connect_db(app):

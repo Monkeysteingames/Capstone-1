@@ -7,10 +7,18 @@
             <p class="card-text">{{g.user.bio}}</p>
         </div>
     </div>
+    {% if fridge %}
     <h1>Scrounging through {{g.user.username}}'s fridge..</h1>
     <h2>Start discovering dishes to make with what you already have!</h2>
+    <form action="/fridge/{{fridge.id}}/add" method="POST">
+        <button class="btn btn-primary" action="submit">Edit Fridge!</button>
+    </form>
+    {% else %}
+    <h1>Create your fridge to start searching for ingredients.</h1>
+    <form action="/fridge/create" method="POST">
+        <button class="btn btn-primary" action="submit">Create Fridge!</button>
+    </form>
+    {% endif %}
 </div>
-
-{% block fridge %}{% endblock %}
 
 {% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- TODO: Show snippet of fridge with current ingredients already added -->
+
+<form method="POST" id="fridge_form" action="/">
+    {{ form.hidden_tag() }}
+
+    {% for field in form if field.widget.input_type != 'hidden' %}
+    {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+    {% endfor %}
+    {{ field(placeholder=field.label.text, class="form-control") }}
+    {% endfor %}
+    <button class="btn btn-success" action="submit">add ingredient</button>
+</form>
+
+{% endblock %}
