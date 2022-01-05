@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
-from forms import LoginForm, UserAddForm, FridgeForm
+from forms import LoginForm, UserAddForm, FridgeForm, FridgeSearchForm
 from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
 from key import API_SECRET_KEY, APP_CONFIG_KEY
 from sqlalchemy.exc import IntegrityError
 from fridge import check_for_fridge
+import requests
+
 
 CURR_USER_KEY = "curr_user"
 
@@ -19,6 +21,7 @@ app.config['SECRET_KEY'] = APP_CONFIG_KEY
 toolbar = DebugToolbarExtension(app)
 
 API_KEY = API_SECRET_KEY
+API_BASE_URL = "https://api.spoonacular.com/"
 
 connect_db(app)
 
@@ -76,7 +79,7 @@ def signup():
 
         except IntegrityError:
             flash("Username already taken", "danger")
-            return render_template('/users/signup.html')
+            return render_template('/users/signup.html', form=form)
 
         do_login(user)
 
@@ -139,14 +142,23 @@ def add_to_fridge(fridge_id):
     """Handle adding ingredient to fridge with id of fridge_id"""
     form = FridgeForm()
     fridge = Fridge.query.get_or_404(fridge_id)
+    ingredients = [(i.id, i.name) for i in Ingredient.query.all()]
+    form.ingredient.choices = ingredients
+    import pdb
+    pdb.set_trace()
 
     if g.user:
         if form.validate_on_submit():
+            #############
+            # TODO: when we obtain ingredients, we'll need to also get the food
+            # group and image so we can display them correctly in the Fridge
+            # We'll need to implement our first API call here
+            #############
             fridge_ing = Fridge_Ingredients(
-                fridge_id=fridge_id, ing_id=form.ing_id.data, food_group=form.food_group.data, img=form.img.data)
+                fridge_id=fridge_id, ing_id=form.ingredient.data)
             db.session.add(fridge_ing)
             db.session.commit()
-            return redirect(f"/fridge/{fridge_id}/add", form=form)
+            return redirect(f"/fridge/{fridge_id}/add")
     else:
         flash("Please login first to create your fridge", "danger")
         return redirect("/login")
@@ -157,6 +169,47 @@ def add_to_fridge(fridge_id):
 @app.route('/fridge/<int:fridge_id>/remove', methods=["GET", "POST"])
 def remove_from_fridge(fridge_id):
     """Handle remove ingredient from fridge with id of fridge_id."""
+
+
+@app.route('/fridge/<int:fridge_id>/search', methods=["GET", "POST"])
+def search_recipes(fridge_id):
+    """Send request to API to search for recipes based on given ingredients"""
+    # TODO: implement fully
+
+    fridge = Fridge.query.get_or_404(fridge_id)
+    form = FridgeSearchForm()
+    choice_range = list(range(1, 100))
+    form.quantity.choices = list(zip(choice_range, choice_range))
+
+    if g.user:
+        if form.validate_on_submit():
+            ingredient = form.ingredient.data
+            r = request_ingredients(ingredient)
+            import pdb
+            pdb.set_trace()
+
+            return render_template('/fridge/recipe-search.html', form=form, fridge=fridge)
+    else:
+        flash("Please login first to create your fridge", "danger")
+        return redirect("/login")
+
+    flash("No form validated", "info")
+    return render_template('/fridge/recipe-search.html', form=form, fridge=fridge)
+
+####################################################################
+# ingredient search methods
+
+
+def request_ingredients(ingredients):
+    """Return list of ingredients based on query."""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={ingredients}&apiKey={key}"
+
+    response = requests.get(url)
+    r = response.json()
+    print(r)
+    return r
+
 
 #####################################################################
 # homepage routes
@@ -169,12 +222,16 @@ def homepage():
     - anon users: show landing page
     - logged in:
         check if fridge exists:
-            - if it does: show user fridge
+            - if it does: show user fridge features
             - if it does not: show button to create fridge
     """
     if g.user:
         fridge = check_for_fridge(g.user.id)
-        return render_template('home.html', fridge=fridge)
+        if fridge:
+            ingredients = Fridge.get_ingredients_list(fridge.id)
+            return render_template('home.html', fridge=fridge, ingredients=ingredients)
+        else:
+            return render_template('home.html', fridge=None)
     else:
-        flash("Welcome!", "Success")
+        flash("Welcome!", "success")
         return render_template('home-anon.html')

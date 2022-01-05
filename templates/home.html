@@ -13,6 +13,9 @@
     <form action="/fridge/{{fridge.id}}/add" method="POST">
         <button class="btn btn-primary" action="submit">Edit Fridge!</button>
     </form>
+    <form action="/fridge/{{fridge.id}}/search" method="GET">
+        <button class="btn btn-success" action="submit">Seach for recipes!</button>
+    </form>
     {% else %}
     <h1>Create your fridge to start searching for ingredients.</h1>
     <form action="/fridge/create" method="POST">
@@ -20,5 +23,12 @@
     </form>
     {% endif %}
 </div>
+
+{% if fridge %}
+<div class="col-lg-6 col-md-8 col-sm-12">
+    <ul class="list-group" id="fridge">
+    </ul>
+</div>
+{% endif %}
 
 {% endblock %}

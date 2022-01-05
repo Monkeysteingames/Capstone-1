@@ -3,7 +3,7 @@
 
 <!-- TODO: Show snippet of fridge with current ingredients already added -->
 
-<form method="POST" id="fridge_form" action="/fridge/{{fridge.id}}/add" method="POST">
+<form id="fridge_form" action="/fridge/{{fridge.id}}/search" method="POST">
     {{ form.hidden_tag() }}
 
     {% for field in form if field.widget.input_type != 'hidden' %}
@@ -12,7 +12,7 @@
     {% endfor %}
     {{ field(placeholder=field.label.text, class="form-control") }}
     {% endfor %}
-    <button class="btn btn-success" action="submit">add ingredient</button>
+    <button class="btn btn-success" action="submit">search recipes!</button>
 </form>
 
 {% endblock %}

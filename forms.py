@@ -1,7 +1,8 @@
 # forms for Adding user, Logging In, Creating/Editing Fridge
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, IntegerField
+from models import Ingredient
+from wtforms import StringField, PasswordField, TextAreaField, IntegerField, SelectField
 from wtforms.validators import DataRequired, Email, Length
 
 
@@ -25,5 +26,12 @@ class LoginForm(FlaskForm):
 class FridgeForm(FlaskForm):
     """Form for adding ingredients to users fridge."""
 
-    ingredient = StringField('Ingredient', validators=[DataRequired()])
+    ingredient = SelectField('Ingredient', coerce=int)
     quantity = IntegerField('Quantity', default=1, validators=[DataRequired()])
+
+
+class FridgeSearchForm(FlaskForm):
+    """Form for searching for ingredients."""
+
+    ingredient = TextAreaField('Ingredient')
+    quantity = SelectField('Amount of Recipes', coerce=int, default=10)

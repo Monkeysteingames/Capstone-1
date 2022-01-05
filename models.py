@@ -68,7 +68,6 @@ class Ingredient(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    ing_id = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f"<Ingredient ID#{self.ing_id}, {self.name}>"
@@ -83,8 +82,18 @@ class Fridge(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id', ondelete='CASCADE'), nullable=False)
 
+    ingredients = db.relationship('Fridge_Ingredients')
+
     def __repr__(self):
         return f"<Fridge #{self.id}, User #{self.user_id}>"
+
+    @classmethod
+    def get_ingredients_list(cls, id):
+        """Get list of ingredients associated with fridge of given id"""
+        fridge = Fridge.query.get_or_404(id)
+        fridge_ingredients = [i.__dict__ for i in fridge.ingredients]
+        ingredients = [i['name'] for i in fridge_ingredients]
+        return ingredients
 
 
 class Fridge_Ingredients(db.Model):
@@ -97,6 +106,7 @@ class Fridge_Ingredients(db.Model):
         'user_fridges.id', ondelete='CASCADE'), nullable=False)
     ing_id = db.Column(db.Integer, db.ForeignKey(
         'ingredients.id', ondelete='CASCADE'), nullable=False)
+    name = db.Column(db.String)
     food_group = db.Column(db.String)
     img = db.Column(db.String)
 

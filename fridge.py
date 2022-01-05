@@ -1,6 +1,6 @@
 # methods for the fridge
-
 from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
+from sqlalchemy.exc import IntegrityError
 
 
 def check_for_fridge(user_id):
@@ -10,5 +10,8 @@ def check_for_fridge(user_id):
 
     - If they do not, return None
     """
-    fridge = Fridge.query.filter_by(user_id=user_id).all()[0]
-    return fridge
+    try:
+        fridge = Fridge.query.filter_by(user_id=user_id).one()
+        return fridge
+    except:
+        return None
