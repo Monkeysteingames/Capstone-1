@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 
 
 def check_for_fridge(user_id):
-    """Check if user already has a fridge created. 
+    """Check if user already has a fridge created.
 
     - If they do, return an instance of the fridge
 

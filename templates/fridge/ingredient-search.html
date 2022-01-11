@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- TODO: Show snippet of fridge with current ingredients already added -->
+
+<form id="fridge_form" action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
+    {{ srch_form.hidden_tag() }}
+
+    {% for field in srch_form if field.widget.input_type != 'hidden' %}
+    {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+    {% endfor %}
+    {{ field(placeholder=field.label.text, class="form-control") }}
+    {% endfor %}
+    <button class="btn btn-success" action="submit">search ingredients</button>
+</form>
+{% if ings %}
+<!-- <form if="ingredient-results" action="/fridge/{{fridge.id}}/add" method="POST">
+    <select class="form-select" aria-label="select example">
+        {% for ing in ings %}
+        <option id={{ing.id}} class="list-group-item list-group-item-action">{{ing.name}}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-primary" action="submit">Add to fridge</button>
+</form> -->
+<form id="fridge_form" action="/fridge/{{fridge.id}}/add" method="POST">
+    {{ srch_form.hidden_tag() }}
+
+    {% for field in res_form if field.widget.input_type != 'hidden' %}
+    {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+    {% endfor %}
+    {% for subfield in res_form.result %}
+    <tr>
+        <td>{{ subfield }}</td>
+        <td>{{ subfield.label }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    <button class="btn btn-success" action="submit">add to fridge</button>
+</form>
+{% endif %}
+
+{% endblock %}

@@ -1,34 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
-<div>
-    <div class="card" style="width: 18rem;">
-        <img src="{{g.user.avatar_img}}" class="card-img-top" alt="users avatar image">
-        <div class="card-body">
-            <p class="card-text">{{g.user.bio}}</p>
+<div class="container">
+    <div class="row align-items-start">
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <img src="{{g.user.avatar_img}}" class="card-img-top" alt="users avatar image">
+                <div class="card-body">
+                    <h5 class="card-title">{{g.user.username}}</h5>
+                    <p class="card-text">{{g.user.bio}}</p>
+                </div>
+            </div>
         </div>
+        <div class="col">
+            {% if fridge %}
+            <h2>Start discovering dishes.</h2>
+            <form action="/fridge/{{fridge.id}}/search" method="GET">
+                <button class="btn btn-success" action="submit">Seach for recipes!</button>
+            </form>
+        </div>
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <h5>Currently in fridge:</h5>
+                <form action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
+                    <button class="btn btn-primary" action="submit">Edit Fridge!</button>
+                </form>
+                <ul class="list-group list-group-flush">
+                    {% for ing in ingredients %}
+                    <li>{{ ing }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <div class="col">
+            <h1>Create your fridge to start searching for ingredients.</h1>
+            <form action="/fridge/create" method="POST">
+                <button class="btn btn-primary" action="submit">Create Fridge!</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
-    {% if fridge %}
-    <h1>Scrounging through {{g.user.username}}'s fridge..</h1>
-    <h2>Start discovering dishes to make with what you already have!</h2>
-    <form action="/fridge/{{fridge.id}}/add" method="POST">
-        <button class="btn btn-primary" action="submit">Edit Fridge!</button>
-    </form>
-    <form action="/fridge/{{fridge.id}}/search" method="GET">
-        <button class="btn btn-success" action="submit">Seach for recipes!</button>
-    </form>
-    {% else %}
-    <h1>Create your fridge to start searching for ingredients.</h1>
-    <form action="/fridge/create" method="POST">
-        <button class="btn btn-primary" action="submit">Create Fridge!</button>
-    </form>
-    {% endif %}
 </div>
 
-{% if fridge %}
-<div class="col-lg-6 col-md-8 col-sm-12">
-    <ul class="list-group" id="fridge">
-    </ul>
-</div>
-{% endif %}
+
 
 {% endblock %}

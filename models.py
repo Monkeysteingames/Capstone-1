@@ -29,7 +29,7 @@ class User(db.Model):
         Hashes password and adds user to system.
         """
 
-        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+        hashed_pwd = bcrypt.generate_password_hash(password).decode("UTF-8")
 
         user = User(
             username=username,
@@ -44,7 +44,7 @@ class User(db.Model):
 
     @classmethod
     def authenticate(cls, username, password):
-        """Find user with provide 'username' & 'password'. 
+        """Find user with provide 'username' & 'password'.
 
         If user and pass match, returns that user object.
 
@@ -79,10 +79,11 @@ class Fridge(db.Model):
     __tablename__ = "user_fridges"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(
-        'users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
-    ingredients = db.relationship('Fridge_Ingredients')
+    ingredients = db.relationship("Fridge_Ingredients")
 
     def __repr__(self):
         return f"<Fridge #{self.id}, User #{self.user_id}>"
@@ -92,7 +93,7 @@ class Fridge(db.Model):
         """Get list of ingredients associated with fridge of given id"""
         fridge = Fridge.query.get_or_404(id)
         fridge_ingredients = [i.__dict__ for i in fridge.ingredients]
-        ingredients = [i['name'] for i in fridge_ingredients]
+        ingredients = [i["name"] for i in fridge_ingredients]
         return ingredients
 
 
@@ -102,13 +103,11 @@ class Fridge_Ingredients(db.Model):
     __tablename__ = "fridge_ingredients"
 
     id = db.Column(db.Integer, primary_key=True)
-    fridge_id = db.Column(db.Integer, db.ForeignKey(
-        'user_fridges.id', ondelete='CASCADE'), nullable=False)
-    ing_id = db.Column(db.Integer, db.ForeignKey(
-        'ingredients.id', ondelete='CASCADE'), nullable=False)
+    fridge_id = db.Column(
+        db.Integer, db.ForeignKey("user_fridges.id", ondelete="CASCADE"), nullable=False
+    )
+    ing_id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String)
-    food_group = db.Column(db.String)
-    img = db.Column(db.String)
 
     def __repr__(self):
         return f"<Ingredient #{self.ing_id}, stored in Fridge #{self.fridge_id}>"
