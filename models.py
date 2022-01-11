@@ -93,8 +93,7 @@ class Fridge(db.Model):
         """Get list of ingredients associated with fridge of given id"""
         fridge = Fridge.query.get_or_404(id)
         fridge_ingredients = [i.__dict__ for i in fridge.ingredients]
-        ingredients = [i["name"] for i in fridge_ingredients]
-        return ingredients
+        return fridge_ingredients
 
 
 class Fridge_Ingredients(db.Model):

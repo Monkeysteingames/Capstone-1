@@ -15,18 +15,24 @@
             {% if fridge %}
             <h2>Start discovering dishes.</h2>
             <form action="/fridge/{{fridge.id}}/search" method="GET">
-                <button class="btn btn-success" action="submit">Seach for recipes!</button>
+                <button class="btn btn-success" action="submit">Seach by fridge.</button>
+            </form>
+            <form action="/fridge/{{fridge.id}}/search" method="GET">
+                <button class="btn btn-success" action="submit">Seach via custom.</button>
             </form>
         </div>
         <div class="col">
-            <div class="card" style="width: 18rem;">
+            <div style="width: 18rem;">
                 <h5>Currently in fridge:</h5>
                 <form action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
-                    <button class="btn btn-primary" action="submit">Edit Fridge!</button>
+                    <button class="btn btn-primary" action="submit">Add to fridge.</button>
                 </form>
                 <ul class="list-group list-group-flush">
                     {% for ing in ingredients %}
-                    <li>{{ ing }}</li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        data-id="{{ing['id']}}">{{
+                        ing['name'] }}<button type="button" class="delete-ing btn btn-danger btn-sm">x</button>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>

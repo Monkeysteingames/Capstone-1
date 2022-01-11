@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from forms import (
     LoginForm,
@@ -144,9 +144,21 @@ def create_fridge():
         return redirect("/login")
 
 
-@app.route("/fridge/<int:fridge_id>/remove", methods=["GET", "POST"])
-def remove_from_fridge(fridge_id):
-    """Handle remove ingredient from fridge with id of fridge_id."""
+@app.route("/fridge/ingredient/remove/<int:id>", methods=["DELETE"])
+def remove_from_fridge(id):
+    """Handle remove ingredient from fridge."""
+    if g.user:
+        fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
+        q = Fridge_Ingredients.query
+        fridge_ing = q.filter(
+            Fridge_Ingredients.id == id, Fridge_Ingredients.fridge_id == fridge.id
+        )
+        db.session.delete(fridge_ing)
+        db.session.commit()
+        return jsonify(message="deleted")
+    else:
+        flash("Please login first to create your fridge", "danger")
+        return redirect("/login")
 
 
 @app.route("/fridge/<int:fridge_id>/search", methods=["GET", "POST"])
