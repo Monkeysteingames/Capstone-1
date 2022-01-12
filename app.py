@@ -22,7 +22,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///cookwhat"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
-app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = True
+app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
 app.config["SECRET_KEY"] = APP_CONFIG_KEY
 toolbar = DebugToolbarExtension(app)
 
@@ -126,6 +126,9 @@ def logout():
     return redirect("/")
 
 
+# TODO: add route to update user profile
+
+
 ######################################################################
 # fridge routes
 
@@ -148,14 +151,16 @@ def create_fridge():
 def remove_from_fridge(id):
     """Handle remove ingredient from fridge."""
     if g.user:
+        # get existing fridge_ing for curr_user and id for ing to delete
         fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
-        q = Fridge_Ingredients.query
-        fridge_ing = q.filter(
+        fridge_ing = Fridge_Ingredients.query.filter(
             Fridge_Ingredients.id == id, Fridge_Ingredients.fridge_id == fridge.id
-        )
+        ).one()
+        # remove from database
         db.session.delete(fridge_ing)
         db.session.commit()
-        return jsonify(message="deleted")
+        # send us back to the homepage
+        return jsonify("message")
     else:
         flash("Please login first to create your fridge", "danger")
         return redirect("/login")
@@ -247,14 +252,12 @@ def add_to_fridge(fridge_id):
             db.session.add(fridge_ing)
             db.session.commit()
             session["ing_list"] = []
-            flash(
-                f"form validated and returning to ingredient search for fridge #{fridge_id}"
-            )
+            flash(f"{ing_name} added to your fridge.", "success")
             return redirect(f"/fridge/{fridge_id}/ingredient/search")
     else:
         flash("Please login first to edit your fridge", "danger")
         return redirect("/login")
-    flash("No form validated.", "danger")
+
     return redirect(f"/fridge/{fridge_id}/ingredient/search")
 
 
