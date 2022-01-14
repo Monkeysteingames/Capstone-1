@@ -165,71 +165,17 @@ def remove_from_fridge(id):
         return jsonify("Must be logged in to remove this ingredient.")
 
 
-@app.route("/fridge/<int:fridge_id>/search", methods=["GET", "POST"])
-def search_recipes(fridge_id):
-    """Send request to API to search for recipes based on given ingredients"""
+@app.route('/recipe/search', methods=["GET"])
+def search_for_recipes(query, numer):
+    """Take query and number from JS send request for recipes. 
 
-    fridge = Fridge.query.get_or_404(fridge_id)
-    form = FridgeSearchForm()
+    Return with JSON of recipes retrieved from API."""
 
-    # API can only support 1-100 results per query, create constraint for total results list
-    choice_range = list(range(1, 101))
-    form.quantity.choices = list(zip(choice_range, choice_range))
-
+    # Implement
     if g.user:
-        # TODO: edit this to get the ingredients from our fridge
-        # we'll need to create a string from the list that fits the API's format for the end point
-        if form.validate_on_submit():
-            ingredients = form.ingredient.data
-            rcps = request_recipes_fridge(ingredients)
-            return render_template(
-                "/fridge/recipe-search.html", form=form, fridge=fridge
-            )
+        None
     else:
-        flash("Please login first to create your fridge", "danger")
-        return redirect("/login")
-
-    return render_template("/fridge/recipe-search.html", form=form, fridge=fridge)
-
-
-@app.route("/fridge/<int:fridge_id>/ingredient/search", methods=["GET", "POST"])
-def search_ingredients(fridge_id):
-    """Send request to API to search for ingredients based on given query"""
-
-    fridge = Fridge.query.get_or_404(fridge_id)
-    srch_form = IngredientSearchForm()
-    # API can only support 1-100 results per query, create constraint for total results list
-    choice_range = list(range(1, 101))
-    srch_form.quantity.choices = list(zip(choice_range, choice_range))
-
-    if g.user:
-        if srch_form.validate_on_submit():
-            # get query from form validation and call API request to get ingredients
-            q = srch_form.query.data
-            ings = request_ingredients(q)
-
-            # split results from API call in list of tuples and add that list to session
-            ing_choices = [(r["id"], r["name"]) for r in ings]
-            session["ing_list"] = ing_choices
-
-            # add ing_list to our choices for the result form and render the template
-            res_form = IngredientResultForm()
-            res_form.result.choices = ing_choices
-
-            return render_template(
-                "home.html",
-                srch_form=srch_form,
-                fridge=fridge,
-                ings=ings,
-                res_form=res_form,
-            )
-    else:
-        flash("Please login first to create your fridge.", "danger")
-        return redirect("/login")
-
-    return render_template(
-        "home.html", srch_form=srch_form, fridge=fridge
-    )
+        None
 
 
 @app.route("/ingredient/search/<query>&<int:number>", methods=["GET"])
@@ -247,49 +193,19 @@ def search_for_ingredients(query, number):
 def add_ingredient_to_fridge():
     """Handle add ingredient to fridge"""
     if g.user:
-        # get existing fridge for curr_user
-        fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
-        fridge_ing = Fridge_Ingredients(
-            fridge_id=fridge.id, ing_id=request.json['ing_id'], name=request.json['ing_name'])
-        db.session.add(fridge_ing)
-        db.session.commit()
-        session["ings"] = []
-        flash(f"{request.json['ing_name']} added to your fridge.", "success")
-        return redirect("/")
-    else:
-        flash("Please login first to edit your fridge", "danger")
-        return redirect("/login")
-
-
-@app.route("/fridge/<int:fridge_id>/add", methods=["GET", "POST"])
-def add_to_fridge(fridge_id):
-    """Handle adding ingredient to fridge with id of fridge_id"""
-    res_form = IngredientResultForm()
-    fridge = Fridge.query.get_or_404(fridge_id)
-    # grab our ing list from session
-    ing_choices = session.get("ing_list", "not found")
-    # having an issue with pre-validation due to using radiofield for the ingredient results.
-    # we need to generate the same ing choices for the form to validate. So we pull it from our session.
-    res_form.result.choices = ing_choices
-
-    if g.user:
-        if res_form.validate_on_submit():
-            ing_name = get_ingredient_name(res_form.result.data)
-            ing_id = res_form.result.data
-
+        try:
+            # see if the fridge we're referencing is our curr_user's
+            fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
             fridge_ing = Fridge_Ingredients(
-                fridge_id=fridge_id, ing_id=ing_id, name=ing_name
-            )
+                fridge_id=fridge.id, ing_id=request.json['ing_id'], name=request.json['ing_name'])
             db.session.add(fridge_ing)
             db.session.commit()
-            session["ing_list"] = []
-            flash(f"{ing_name} added to your fridge.", "success")
-            return redirect("/")
+            session["ings"] = []
+            return jsonify(f"{request.json['ing_name']} added to fridge {fridge.id}")
+        except:
+            return jsonify('No matching fridge detected for curr_user')
     else:
-        flash("Please login first to edit your fridge", "danger")
-        return redirect("/login")
-
-    return redirect(f"/fridge/{fridge_id}/ingredient/search")
+        return jsonify("User not logged in. Cannot add item to fridge.")
 
 
 def get_ingredient_name(selection):
@@ -309,23 +225,10 @@ def get_ingredient_name(selection):
 ####################################################################
 # ingredient & recipe search methods - API calls
 
-
-def request_recipes_fridge(ingredients):
-    """Return list of recipes based on query."""
-    key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={ingredients}&apiKey={key}"
-
-    response = requests.get(url)
-    res = response.json()
-    rcps = [r for r in res["results"]]
-
-    return rcps
-
-
 def request_recipes_search(query, number):
     """Return list of recipes based on query."""
     key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/recipes/complexSearch?query={query}&apiKey={key}"
+    url = f"{API_BASE_URL}/recipes/complexSearch?query={query}&number={number}&apiKey={key}"
 
     response = requests.get(url)
     res = response.json()

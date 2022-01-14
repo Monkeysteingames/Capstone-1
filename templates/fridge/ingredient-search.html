@@ -1,7 +1,7 @@
 {% extends 'home.html' %}
 {% block content %}
 
-<form id="fridge_form" action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
+<form id="fridge_form" action="/fridge/{{fridge.id}}/add" method="POST">
     {{ srch_form.hidden_tag() }}
 
     {% for field in res_form if field.widget.input_type != 'hidden' %}
