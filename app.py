@@ -159,11 +159,10 @@ def remove_from_fridge(id):
         # remove from database
         db.session.delete(fridge_ing)
         db.session.commit()
-        # send us back to the homepage
-        return jsonify("message")
+        return jsonify(f"ingredient {id} removed from fridge {fridge.id}")
     else:
         flash("Please login first to create your fridge", "danger")
-        return redirect("/login")
+        return jsonify("Must be logged in to remove this ingredient.")
 
 
 @app.route("/fridge/<int:fridge_id>/search", methods=["GET", "POST"])
@@ -178,9 +177,11 @@ def search_recipes(fridge_id):
     form.quantity.choices = list(zip(choice_range, choice_range))
 
     if g.user:
+        # TODO: edit this to get the ingredients from our fridge
+        # we'll need to create a string from the list that fits the API's format for the end point
         if form.validate_on_submit():
             ingredients = form.ingredient.data
-            rcps = request_recipes(ingredients)
+            rcps = request_recipes_fridge(ingredients)
             return render_template(
                 "/fridge/recipe-search.html", form=form, fridge=fridge
             )
@@ -214,23 +215,53 @@ def search_ingredients(fridge_id):
             # add ing_list to our choices for the result form and render the template
             res_form = IngredientResultForm()
             res_form.result.choices = ing_choices
+
             return render_template(
-                "/fridge/ingredient-search.html",
+                "home.html",
                 srch_form=srch_form,
                 fridge=fridge,
                 ings=ings,
                 res_form=res_form,
             )
     else:
-        flash("Please login first to create your fridge", "danger")
+        flash("Please login first to create your fridge.", "danger")
         return redirect("/login")
 
     return render_template(
-        "/fridge/ingredient-search.html", srch_form=srch_form, fridge=fridge
+        "home.html", srch_form=srch_form, fridge=fridge
     )
 
 
-@app.route("/fridge/<int:fridge_id>/add", methods=["POST"])
+@app.route("/ingredient/search/<query>&<int:number>", methods=["GET"])
+def search_for_ingredients(query, number):
+    """Handle ingredient search"""
+    if g.user:
+        ings = request_ingredients(query, number)
+        session['ings'] = ings
+        return jsonify(ings)
+    else:
+        return jsonify('Must be logged in to search ingredients.')
+
+
+@app.route("/fridge/ingredient/add", methods=["POST"])
+def add_ingredient_to_fridge():
+    """Handle add ingredient to fridge"""
+    if g.user:
+        # get existing fridge for curr_user
+        fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
+        fridge_ing = Fridge_Ingredients(
+            fridge_id=fridge.id, ing_id=request.json['ing_id'], name=request.json['ing_name'])
+        db.session.add(fridge_ing)
+        db.session.commit()
+        session["ings"] = []
+        flash(f"{request.json['ing_name']} added to your fridge.", "success")
+        return redirect("/")
+    else:
+        flash("Please login first to edit your fridge", "danger")
+        return redirect("/login")
+
+
+@app.route("/fridge/<int:fridge_id>/add", methods=["GET", "POST"])
 def add_to_fridge(fridge_id):
     """Handle adding ingredient to fridge with id of fridge_id"""
     res_form = IngredientResultForm()
@@ -253,7 +284,7 @@ def add_to_fridge(fridge_id):
             db.session.commit()
             session["ing_list"] = []
             flash(f"{ing_name} added to your fridge.", "success")
-            return redirect(f"/fridge/{fridge_id}/ingredient/search")
+            return redirect("/")
     else:
         flash("Please login first to edit your fridge", "danger")
         return redirect("/login")
@@ -279,8 +310,8 @@ def get_ingredient_name(selection):
 # ingredient & recipe search methods - API calls
 
 
-def request_recipes(ingredients):
-    """Return list of ingredients based on query."""
+def request_recipes_fridge(ingredients):
+    """Return list of recipes based on query."""
     key = API_SECRET_KEY
     url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={ingredients}&apiKey={key}"
 
@@ -291,10 +322,22 @@ def request_recipes(ingredients):
     return rcps
 
 
-def request_ingredients(query):
+def request_recipes_search(query, number):
+    """Return list of recipes based on query."""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/recipes/complexSearch?query={query}&apiKey={key}"
+
+    response = requests.get(url)
+    res = response.json()
+    rcps = [r for r in res["results"]]
+
+    return rcps
+
+
+def request_ingredients(query, number):
     """Return list of ingredients based on query."""
     key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/food/ingredients/search?query={query}&apiKey={key}"
+    url = f"{API_BASE_URL}/food/ingredients/search?query={query}&number={number}&apiKey={key}"
 
     response = requests.get(url)
     res = response.json()
@@ -321,7 +364,10 @@ def homepage():
         fridge = check_for_fridge(g.user.id)
         if fridge:
             ingredients = Fridge.get_ingredients_list(fridge.id)
-            return render_template("home.html", fridge=fridge, ingredients=ingredients)
+            srch_form = IngredientSearchForm()
+            choice_range = list(range(1, 101))
+            srch_form.quantity.choices = list(zip(choice_range, choice_range))
+            return render_template("home.html", fridge=fridge, ingredients=ingredients, srch_form=srch_form)
         else:
             return render_template("home.html", fridge=None)
     else:

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container ">
+<div class="container">
     <div class="row">
+        <!-- User avatar -->
         <div class="col">
             <div class="card" style="width: 18rem;">
                 <img src="{{g.user.avatar_img}}" class="rounded" alt="users avatar image">
@@ -19,6 +20,7 @@
         </div>
         <div class="col text-center">
             {% if fridge %}
+            <!-- Fridge Search -->
             <h2>Discover more dishes.</h2>
             <div class="p-3">
                 <form action="/fridge/{{fridge.id}}/search" method="GET">
@@ -29,9 +31,12 @@
         <div class="col text-center">
             <div style="width: 18rem;">
                 <h5>Currently in fridge:</h5>
-                <form action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
-                    <button class="btn btn-primary" action="submit">Add to fridge</button>
-                </form>
+                <!-- Button trigger modal -->
+                <button type="button" id="fridgeModalButton" class="btn btn-primary" data-toggle="modal"
+                    data-target="#fridgeModal">
+                    Add to fridge!
+                </button>
+                <!-- Fridge Ingredients -->
                 <ul class="list-group list-group-flush">
                     {% for ing in ingredients %}
                     <li class="list-group-item d-flex justify-content-between align-items-center"
@@ -42,7 +47,48 @@
                 </ul>
             </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="fridgeModal" tabindex="-1" role="dialog" aria-labelledby="fridgeModalTitle"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="fridgeModalTitle">Add ingredient to fridge</h5>
+                        <button type="button" id="fridgeModalCloseButton" class="btn btn-danger" data-dismiss="modal"
+                            aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Ingredient Search -->
+                        <form id="fridge_form" method="GET">
+
+                            {{ srch_form.hidden_tag() }}
+
+                            {% for field in srch_form if field.widget.input_type != 'hidden' %}
+                            {% for error in field.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                            {{ field(placeholder=field.label.text, class="form-control") }}
+                            {% endfor %}
+                            <button class="btn btn-success" id="fridgeSearchButton" type="button">search
+                                ingredients</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="col align-self-center">
+
+                            <!-- Add the results in here -->
+                            <!-- Ingredient Results -->
+                            <form class="form-check" id="ingResultsForm">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% else %}
+        <!-- Fridge Creation -->
         <div class="col text-center">
             <h1>Create your fridge to start searching for ingredients.</h1>
             <form action="/fridge/create" method="POST">

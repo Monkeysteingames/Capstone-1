@@ -1,21 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'home.html' %}
 {% block content %}
 
-<!-- TODO: Show snippet of fridge with current ingredients already added -->
-
 <form id="fridge_form" action="/fridge/{{fridge.id}}/ingredient/search" method="POST">
-    {{ srch_form.hidden_tag() }}
-
-    {% for field in srch_form if field.widget.input_type != 'hidden' %}
-    {% for error in field.errors %}
-    <span class="text-danger">{{ error }}</span>
-    {% endfor %}
-    {{ field(placeholder=field.label.text, class="form-control") }}
-    {% endfor %}
-    <button class="btn btn-success" action="submit">search ingredients</button>
-</form>
-{% if ings %}
-<form id="fridge_form" action="/fridge/{{fridge.id}}/add" method="POST">
     {{ srch_form.hidden_tag() }}
 
     {% for field in res_form if field.widget.input_type != 'hidden' %}
@@ -31,6 +17,5 @@
     {% endfor %}
     <button class="btn btn-success" action="submit">add to fridge</button>
 </form>
-{% endif %}
 
 {% endblock %}
