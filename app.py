@@ -166,16 +166,18 @@ def remove_from_fridge(id):
 
 
 @app.route('/recipe/search', methods=["GET"])
-def search_for_recipes(query, numer):
+def search_for_recipes():
     """Take query and number from JS send request for recipes. 
 
     Return with JSON of recipes retrieved from API."""
-
     # Implement
     if g.user:
-        None
+        query = gather_ingredients_query()
+        # We'll implement quantity selection for num of results on deployment
+        rcps = request_recipes_search(query=query, number=10)
+        return jsonify(rcps)
     else:
-        None
+        return jsonify("Must be logged in to search for recipes.")
 
 
 @app.route("/ingredient/search/<query>&<int:number>", methods=["GET"])
@@ -183,7 +185,7 @@ def search_for_ingredients(query, number):
     """Handle ingredient search"""
     if g.user:
         ings = request_ingredients(query, number)
-        session['ings'] = ings
+        session['add_ings'] = ings
         return jsonify(ings)
     else:
         return jsonify('Must be logged in to search ingredients.')
@@ -200,7 +202,7 @@ def add_ingredient_to_fridge():
                 fridge_id=fridge.id, ing_id=request.json['ing_id'], name=request.json['ing_name'])
             db.session.add(fridge_ing)
             db.session.commit()
-            session["ings"] = []
+            session["add_ings"] = []
             return jsonify(f"{request.json['ing_name']} added to fridge {fridge.id}")
         except:
             return jsonify('No matching fridge detected for curr_user')
@@ -208,32 +210,48 @@ def add_ingredient_to_fridge():
         return jsonify("User not logged in. Cannot add item to fridge.")
 
 
-def get_ingredient_name(selection):
-    """Take the id of the ing we selected from the ing_res form.
+@app.route('/fridge/ingredient/search/<int:ing_id>', methods=["GET"])
+def get_fridge_ing_id(ing_id):
+    """Search db for matching ing_id and fridge_id.
 
-    Turn the list of tuples into a dict.
+    Return json data of the id within in fridge."""
+    if g.user:
+        try:
+            fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
+            frg_ing = Fridge_Ingredients.query.filter(
+                Fridge_Ingredients.ing_id == ing_id, Fridge_Ingredients.fridge_id == fridge.id
+            ).one()
+            ing_f_id = frg_ing.id
+            return jsonify(ing_f_id)
+        except:
+            return jsonify('No matching ingredient located in curr_users fridge.')
+    else:
+        return jsonify('No user logged in.')
 
-    Get value of index with id == selection
-    """
-    ing_choices = session.get("ing_list", "not found")
-    # change to dict to search through more efficiently
-    d_ing_choices = dict(ing_choices)
-    name = d_ing_choices[selection]
-    return name
 
+def gather_ingredients_query():
+    """Gather all the ingredients in the current fridge.
+
+    Generate a list of them and turn into string.
+
+    Each ingredient must be seperated with a ','. """
+    fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
+    ing_list = Fridge.get_ingredients_list(fridge.id)
+    ing_names = [ing.get('name', None) for ing in ing_list]
+    ing_q = ',+'.join(ing_names)
+    return ing_q
 
 ####################################################################
-# ingredient & recipe search methods - API calls
+# ingredient & recipe search methods & API calls
+
 
 def request_recipes_search(query, number):
     """Return list of recipes based on query."""
     key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/recipes/complexSearch?query={query}&number={number}&apiKey={key}"
+    url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={query}&number={number}&apiKey={key}"
 
     response = requests.get(url)
-    res = response.json()
-    rcps = [r for r in res["results"]]
-
+    rcps = response.json()
     return rcps
 
 
@@ -248,6 +266,19 @@ def request_ingredients(query, number):
 
     return ings
 
+
+def get_ingredient_name(selection):
+    """Take the id of the ing we selected from the ing_res form.
+
+    Turn the list of tuples into a dict.
+
+    Get value of index with id == selection
+    """
+    ing_choices = session.get("ing_list", "not found")
+    # change to dict to search through more efficiently
+    d_ing_choices = dict(ing_choices)
+    name = d_ing_choices[selection]
+    return name
 
 #####################################################################
 # homepage routes
