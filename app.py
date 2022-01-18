@@ -237,8 +237,11 @@ def gather_ingredients_query():
     Each ingredient must be seperated with a ','. """
     fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
     ing_list = Fridge.get_ingredients_list(fridge.id)
-    ing_names = [ing.get('name', None) for ing in ing_list]
-    ing_q = ',+'.join(ing_names)
+    if len(ing_list) == 1:
+        ing_q = ing_list[0].get('name', None)
+    else:
+        ing_names = [ing.get('name', None) for ing in ing_list]
+        ing_q = ',+'.join(ing_names)
     return ing_q
 
 ####################################################################

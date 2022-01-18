@@ -14,6 +14,7 @@ $('#fridgeModalButton').click(showFridgeModal)
 
 function showFridgeModal() {
     $('#fridgeModal').modal('show')
+    $('#query').val(null)
 }
 
 $('#fridgeModalCloseButton').click(hideFridgeModal)
@@ -80,7 +81,34 @@ function generateNewFridgeItemHTML(ing_name, ing_id) {
 $("#rcpFridgeSearch").click(requestRcps);
 
 async function requestRcps() {
+    if ($('#recipeResults').children().length > 0) {
+        $('#recipeResults').empty()
+    }
+
     let res = await axios.get('/recipe/search')
     let rcps = res.data
-    console.log(rcps)
+
+    for (let rcp of rcps) {
+        let rcp_cd = $(generateRecipeListHTML(rcp));
+        $('#recipeResults').append(rcp_cd);
+        $(`#rcp-${rcp.id}`).click(showRecipe)
+    }
+}
+
+function generateRecipeListHTML(rcp) {
+    // add in id to allow hover animation to select into recipe
+    return `<div class="card mb-3" id="rcp-${rcp.id}">
+            <img src="${rcp.image}" class="card-img-top" alt="recipe image">
+                <div class="card-body">
+                    <h5 class="card-title">${rcp.title}</h5>
+                    <p class="card-text"><small class="text">likes: ${rcp.likes}</small></p>
+                    <form action="/recipe/show/${rcp.id}">
+                        <button type="submit" class="btn btn-outline-success">check out!</  
+                    </form>
+                </div>
+            </div>`
+}
+
+async function showRecipe() {
+
 }
