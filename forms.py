@@ -23,6 +23,14 @@ class UserAddForm(FlaskForm):
     bio = StringField("(Optional) Bio for user")
 
 
+class UserEditForm(FlaskForm):
+
+    username = StringField("Username", validators=[DataRequired()])
+    email = StringField("E-mail", validators=[DataRequired(), Email()])
+    avatar_img = StringField("(Optional) Image URL")
+    bio = StringField("(Optional) Bio for user")
+
+
 class LoginForm(FlaskForm):
     """Login form."""
 

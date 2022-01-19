@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- TODO: Show snippet of fridge with current ingredients already added -->
-
 <form id="fridge_form" action="/fridge/{{fridge.id}}/search" method="POST">
     {{ form.hidden_tag() }}
 

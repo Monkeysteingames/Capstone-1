@@ -6,6 +6,7 @@ from forms import (
     FridgeSearchForm,
     IngredientSearchForm,
     IngredientResultForm,
+    UserEditForm,
 )
 from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
 from key import API_SECRET_KEY, APP_CONFIG_KEY
@@ -126,8 +127,29 @@ def logout():
     return redirect("/")
 
 
-# TODO: add route to update user profile
+@app.route('/user/edit/<int:id>', methods=["GET", "POST"])
+def edit_user_profile(id):
+    """Handle edit user profile."""
 
+    user = User.query.get_or_404(id)
+    form = UserEditForm(obj=user)
+
+    if form.validate_on_submit():
+        if user.id == g.user.id:
+            user.username = form.username.data
+            user.email = form.email.data
+            user.avatar_img = form.avatar_img.data
+            user.password = user.password
+            user.bio = form.bio.data
+
+            db.session.commit()
+            flash("User profile updated.", "info")
+            return redirect('/')
+        else:
+            flash("Invalid credentials detected.", "danger")
+            return redirect('/')
+    else:
+        return render_template("/users/edit.html", form=form)
 
 ######################################################################
 # fridge routes
@@ -351,9 +373,9 @@ def homepage():
             srch_form = IngredientSearchForm()
             choice_range = list(range(1, 101))
             srch_form.quantity.choices = list(zip(choice_range, choice_range))
-            return render_template("/fridge/user-fridge.html", fridge=fridge, ingredients=ingredients, srch_form=srch_form)
+            return render_template("/fridge/user.html", fridge=fridge, ingredients=ingredients, srch_form=srch_form)
         else:
-            return render_template("/fridge/user-fridge.html", fridge=None)
+            return render_template("/fridge/user.html", fridge=None)
     else:
         flash("Welcome!", "success")
         return render_template("base-anon.html")
