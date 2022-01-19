@@ -147,23 +147,8 @@ def create_fridge():
         return redirect("/login")
 
 
-@app.route("/fridge/ingredient/remove/<int:id>", methods=["DELETE"])
-def remove_from_fridge(id):
-    """Handle remove ingredient from fridge."""
-    if g.user:
-        # get existing fridge_ing for curr_user and id for ing to delete
-        fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
-        fridge_ing = Fridge_Ingredients.query.filter(
-            Fridge_Ingredients.id == id, Fridge_Ingredients.fridge_id == fridge.id
-        ).one()
-        # remove from database
-        db.session.delete(fridge_ing)
-        db.session.commit()
-        return jsonify(f"ingredient {id} removed from fridge {fridge.id}")
-    else:
-        flash("Please login first to create your fridge", "danger")
-        return jsonify("Must be logged in to remove this ingredient.")
-
+##################################################################################
+# recipe routes
 
 @app.route('/recipe/search', methods=["GET"])
 def search_for_recipes():
@@ -178,6 +163,26 @@ def search_for_recipes():
         return jsonify(rcps)
     else:
         return jsonify("Must be logged in to search for recipes.")
+
+
+@app.route('/recipe/check-out/<int:rcp_id>', methods=["GET"])
+def check_out_recipe(rcp_id):
+    """
+    Return JSON with recipe information from API.
+
+    Render new template to present recipe information."""
+    if g.user:
+        rcp_info = lookup_recipe_info(rcp_id)
+        rcp_inst_json = get_recipe_instructions(rcp_id)
+        rcp_inst = [s['step'] for s in rcp_inst_json[0]['steps']]
+        return render_template('/recipe/recipe.html', rcp_info=rcp_info, rcp_inst=rcp_inst)
+    else:
+        flash("Please login first to search for ingredients.", "danger")
+        return redirect('/')
+
+
+###############################################################################
+# ingredient routes
 
 
 @app.route("/ingredient/search/<query>&<int:number>", methods=["GET"])
@@ -229,6 +234,27 @@ def get_fridge_ing_id(ing_id):
         return jsonify('No user logged in.')
 
 
+@app.route("/fridge/ingredient/remove/<int:id>", methods=["DELETE"])
+def remove_from_fridge(id):
+    """Handle remove ingredient from fridge."""
+    if g.user:
+        # get existing fridge_ing for curr_user and id for ing to delete
+        fridge = Fridge.query.filter(Fridge.user_id == g.user.id).one()
+        fridge_ing = Fridge_Ingredients.query.filter(
+            Fridge_Ingredients.id == id, Fridge_Ingredients.fridge_id == fridge.id
+        ).one()
+        # remove from database
+        db.session.delete(fridge_ing)
+        db.session.commit()
+        return jsonify(f"ingredient {id} removed from fridge {fridge.id}")
+    else:
+        flash("Please login first to create your fridge", "danger")
+        return jsonify("Must be logged in to remove this ingredient.")
+
+
+#################################
+# Non-view functions for ingredients
+
 def gather_ingredients_query():
     """Gather all the ingredients in the current fridge.
 
@@ -244,31 +270,6 @@ def gather_ingredients_query():
         ing_q = ',+'.join(ing_names)
     return ing_q
 
-####################################################################
-# ingredient & recipe search methods & API calls
-
-
-def request_recipes_search(query, number):
-    """Return list of recipes based on query."""
-    key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={query}&number={number}&apiKey={key}"
-
-    response = requests.get(url)
-    rcps = response.json()
-    return rcps
-
-
-def request_ingredients(query, number):
-    """Return list of ingredients based on query."""
-    key = API_SECRET_KEY
-    url = f"{API_BASE_URL}/food/ingredients/search?query={query}&number={number}&apiKey={key}"
-
-    response = requests.get(url)
-    res = response.json()
-    ings = [r for r in res["results"]]
-
-    return ings
-
 
 def get_ingredient_name(selection):
     """Take the id of the ing we selected from the ing_res form.
@@ -282,6 +283,52 @@ def get_ingredient_name(selection):
     d_ing_choices = dict(ing_choices)
     name = d_ing_choices[selection]
     return name
+
+####################################################################
+# ingredient & recipe API calls
+
+
+def request_recipes_search(query, number):
+    """Return list of recipes based on query."""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={query}&number={number}&apiKey={key}"
+
+    response = requests.get(url)
+    rcps = response.json()
+    return rcps
+
+
+def lookup_recipe_info(id):
+    """Return JSON of recipe info with given id"""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/recipes/{id}/information?includeNutrition=false&apiKey={key}"
+
+    response = requests.get(url)
+    rcp_inf = response.json()
+    return rcp_inf
+
+
+def get_recipe_instructions(id):
+    """Return JSON of recipe instructions with given id"""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/recipes/{id}/analyzedInstructions?apiKey={key}"
+
+    response = requests.get(url)
+    rcp_inst = response.json()
+    return rcp_inst
+
+
+def request_ingredients(query, number):
+    """Return list of ingredients based on query."""
+    key = API_SECRET_KEY
+    url = f"{API_BASE_URL}/food/ingredients/search?query={query}&number={number}&apiKey={key}"
+
+    response = requests.get(url)
+    res = response.json()
+    ings = [r for r in res["results"]]
+
+    return ings
+
 
 #####################################################################
 # homepage routes
@@ -304,9 +351,9 @@ def homepage():
             srch_form = IngredientSearchForm()
             choice_range = list(range(1, 101))
             srch_form.quantity.choices = list(zip(choice_range, choice_range))
-            return render_template("home.html", fridge=fridge, ingredients=ingredients, srch_form=srch_form)
+            return render_template("/fridge/user-fridge.html", fridge=fridge, ingredients=ingredients, srch_form=srch_form)
         else:
-            return render_template("home.html", fridge=None)
+            return render_template("/fridge/user-fridge.html", fridge=None)
     else:
         flash("Welcome!", "success")
-        return render_template("home-anon.html")
+        return render_template("base-anon.html")

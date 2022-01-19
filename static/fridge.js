@@ -91,24 +91,19 @@ async function requestRcps() {
     for (let rcp of rcps) {
         let rcp_cd = $(generateRecipeListHTML(rcp));
         $('#recipeResults').append(rcp_cd);
-        $(`#rcp-${rcp.id}`).click(showRecipe)
     }
 }
 
 function generateRecipeListHTML(rcp) {
     // add in id to allow hover animation to select into recipe
+    // REPLACE BUTTON WITH A TAG.........
     return `<div class="card mb-3" id="rcp-${rcp.id}">
             <img src="${rcp.image}" class="card-img-top" alt="recipe image">
                 <div class="card-body">
                     <h5 class="card-title">${rcp.title}</h5>
                     <p class="card-text"><small class="text">likes: ${rcp.likes}</small></p>
-                    <form action="/recipe/show/${rcp.id}">
-                        <button type="submit" class="btn btn-outline-success">check out!</  
-                    </form>
+                    <form action="/recipe/check-out/${rcp.id}"><button type="submit" 
+                    class="btn btn-outline-success">Check out!</button></form>
                 </div>
             </div>`
-}
-
-async function showRecipe() {
-
 }

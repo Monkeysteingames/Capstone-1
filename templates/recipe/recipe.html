@@ -1,5 +1,36 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<div class="container">
+    <div class="row">
+        <div class="col text-center" id="info-col">
+            <h1>{{rcp_info.title}}</h1>
+            <img src="{{rcp_info.image}}" alt="recipe image">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Servings: {{rcp_info.servings}}</li>
+                <li class="list-group-item">Ready Time: {{rcp_info.readyInMinutes}} minutes</li>
+                <li class="list-group-item">Source: {{rcp_info.sourceName}}</li>
+                <li class="list-group-item">Source URL: <a href="{{rcp_info.sourceUrl}}">{{rcp_info.sourceUrl}}</a></a>
+                </li>
+            </ul>
+            <h4>Ingredients:</h4>
+            <li class="list-group-item">
+                <ul class="list-group list-group-flush">
+                    {% for ing in rcp_info.extendedIngredients %}
+                    <li class="list-group-item">{{ing.original}}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        </div>
+        <div class="col text-center" id="inst-col">
+            <h3>Instructions:</h3>
+            <ul class="list-group">
+                {% for inst in rcp_inst %}
+                <li class="list-group-item list-group-item-dark">{{inst}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
