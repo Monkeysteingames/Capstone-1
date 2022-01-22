@@ -87,6 +87,7 @@ async function requestRcps() {
 
     let res = await axios.get('/recipe/search')
     let rcps = res.data
+    console.log(rcps)
 
     for (let rcp of rcps) {
         let rcp_cd = $(generateRecipeListHTML(rcp));

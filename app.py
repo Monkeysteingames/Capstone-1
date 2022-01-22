@@ -162,7 +162,7 @@ def create_fridge():
         fridge = Fridge(user_id=g.user.id)
         db.session.add(fridge)
         db.session.commit()
-        flash(f"Fridge created for user #{g.user.id}", "success")
+        flash(f"Fridge created!", "success")
         return redirect("/")
     else:
         flash("Please login first to create your fridge", "danger")

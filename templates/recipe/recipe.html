@@ -3,9 +3,9 @@
 
 <div class="container">
     <div class="row">
+        <h1 class="text-center">{{rcp_info.title}}</h1>
         <div class="col text-center" id="info-col">
-            <h1>{{rcp_info.title}}</h1>
-            <img src="{{rcp_info.image}}" alt="recipe image">
+            <img src="{{rcp_info.image}}" alt="recipe image" class="p-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Servings: {{rcp_info.servings}}</li>
                 <li class="list-group-item">Ready Time: {{rcp_info.readyInMinutes}} minutes</li>
@@ -13,22 +13,20 @@
                 <li class="list-group-item">Source URL: <a href="{{rcp_info.sourceUrl}}">{{rcp_info.sourceUrl}}</a></a>
                 </li>
             </ul>
-            <h4>Ingredients:</h4>
-            <li class="list-group-item">
-                <ul class="list-group list-group-flush">
-                    {% for ing in rcp_info.extendedIngredients %}
-                    <li class="list-group-item">{{ing.original}}</li>
-                    {% endfor %}
-                </ul>
-            </li>
         </div>
         <div class="col text-center" id="inst-col">
+            <h4>Ingredients:</h4>
+            <ul class="list-group list-group-flush">
+                {% for ing in rcp_info.extendedIngredients %}
+                <li class="list-group-item">{{ing.original}}</li>
+                {% endfor %}
+            </ul>
             <h3>Instructions:</h3>
-            <ul class="list-group">
+            <ol class="list-group list-group-numbered">
                 {% for inst in rcp_inst %}
                 <li class="list-group-item list-group-item-dark">{{inst}}</li>
                 {% endfor %}
-            </ul>
+            </ol>
         </div>
     </div>
 </div>
