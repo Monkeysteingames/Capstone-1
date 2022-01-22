@@ -19,15 +19,25 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///cookwhat"
+ENV = 'prod'
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_ECHO"] = True
-app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-app.config["SECRET_KEY"] = APP_CONFIG_KEY
-toolbar = DebugToolbarExtension(app)
+if ENV == 'dev':
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///cookwhat"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ECHO"] = True
+    app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
+    app.config["SECRET_KEY"] = APP_CONFIG_KEY
+    toolbar = DebugToolbarExtension(app)
+    API_KEY = API_SECRET_KEY
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = 'postgres://luavddnglgtpqk:9d32977cdfcb146d3ca4506e08260896d5effea72267c86203eedf5d74b27cba@ec2-184-73-243-101.compute-1.amazonaws.com:5432/d7ickq4oojjlgh'
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ECHO"] = True
+    app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
+    app.config["SECRET_KEY"] = APP_CONFIG_KEY
+    toolbar = DebugToolbarExtension(app)
+    API_KEY = API_SECRET_KEY
 
-API_KEY = API_SECRET_KEY
 API_BASE_URL = "https://api.spoonacular.com/"
 
 connect_db(app)
