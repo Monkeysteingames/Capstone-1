@@ -9,7 +9,6 @@ from forms import (
     UserEditForm,
 )
 from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
-# from key import API_SECRET_KEY, APP_CONFIG_KEY
 from sqlalchemy.exc import IntegrityError
 from fridge import check_for_fridge
 import requests
