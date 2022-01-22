@@ -12,6 +12,7 @@ from models import User, Ingredient, Fridge, Fridge_Ingredients, connect_db, db
 from sqlalchemy.exc import IntegrityError
 from fridge import check_for_fridge
 import requests
+import os
 
 
 CURR_USER_KEY = "curr_user"
@@ -25,17 +26,15 @@ if ENV == 'dev':
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = True
     app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-    app.config["SECRET_KEY"] = 'test'  # APP_CONFIG_KEY
+    app.config["SECRET_KEY"] = os.environ.get('API_KEY')
     toolbar = DebugToolbarExtension(app)
-    API_KEY = 'test'  # API_SECRET_KEY
+    API_KEY = os.environ.get('CONFIG_KEY')
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = 'postgres://luavddnglgtpqk:9d32977cdfcb146d3ca4506e08260896d5effea72267c86203eedf5d74b27cba@ec2-184-73-243-101.compute-1.amazonaws.com:5432/d7ickq4oojjlgh'
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SQLALCHEMY_ECHO"] = True
-    app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-    app.config["SECRET_KEY"] = 'test'  # APP_CONFIG_KEY
-    toolbar = DebugToolbarExtension(app)
-    API_KEY = 'test'  # API_SECRET_KEY
+    app.config["SQLALCHEMY_ECHO"] = False
+    app.config["SECRET_KEY"] = os.environ.get('API_KEY')
+    API_KEY = os.environ.get('CONFIG_KEY')
 
 API_BASE_URL = "https://api.spoonacular.com/"
 
@@ -321,7 +320,7 @@ def get_ingredient_name(selection):
 
 def request_recipes_search(query, number):
     """Return list of recipes based on query."""
-    key = API_SECRET_KEY
+    key = API_KEY
     url = f"{API_BASE_URL}/recipes/findByIngredients?ingredients={query}&number={number}&apiKey={key}"
 
     response = requests.get(url)
@@ -331,7 +330,7 @@ def request_recipes_search(query, number):
 
 def lookup_recipe_info(id):
     """Return JSON of recipe info with given id"""
-    key = API_SECRET_KEY
+    key = API_KEY
     url = f"{API_BASE_URL}/recipes/{id}/information?includeNutrition=false&apiKey={key}"
 
     response = requests.get(url)
@@ -341,7 +340,7 @@ def lookup_recipe_info(id):
 
 def get_recipe_instructions(id):
     """Return JSON of recipe instructions with given id"""
-    key = API_SECRET_KEY
+    key = API_KEY
     url = f"{API_BASE_URL}/recipes/{id}/analyzedInstructions?apiKey={key}"
 
     response = requests.get(url)
@@ -351,7 +350,7 @@ def get_recipe_instructions(id):
 
 def request_ingredients(query, number):
     """Return list of ingredients based on query."""
-    key = API_SECRET_KEY
+    key = API_KEY
     url = f"{API_BASE_URL}/food/ingredients/search?query={query}&number={number}&apiKey={key}"
 
     response = requests.get(url)
