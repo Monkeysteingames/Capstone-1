@@ -26,15 +26,15 @@ if ENV == 'dev':
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = True
     app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-    app.config["SECRET_KEY"] = os.environ.get('API_KEY')
+    app.config["SECRET_KEY"] = os.environ.get('CONFIG_KEY')
     toolbar = DebugToolbarExtension(app)
-    API_KEY = os.environ.get('CONFIG_KEY')
+    API_KEY = os.environ.get('API_KEY')
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = 'postgres://luavddnglgtpqk:9d32977cdfcb146d3ca4506e08260896d5effea72267c86203eedf5d74b27cba@ec2-184-73-243-101.compute-1.amazonaws.com:5432/d7ickq4oojjlgh'
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = False
-    app.config["SECRET_KEY"] = os.environ.get('API_KEY')
-    API_KEY = os.environ.get('CONFIG_KEY')
+    app.config["SECRET_KEY"] = os.environ.get('CONFIG_KEY')
+    API_KEY = os.environ.get('API_KEY')
 
 API_BASE_URL = "https://api.spoonacular.com/"
 
