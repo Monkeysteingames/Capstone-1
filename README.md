@@ -1,8 +1,8 @@
-Welcome! 
+# Welcome! 
 
-The name of this application is called: Cook What!?
+## The name of this application is called: Cook What!?
 
-All recipes and ingredients used are sourced from the below API: 
+*All recipes and ingredients used are sourced from the below API*: 
 https://spoonacular.com/food-api
 
 
@@ -24,6 +24,11 @@ Further iterations of this application may include filters(nutrition facts, igno
 
 --------
 
-The technology used for the application was Flask, SQLAlchemy, Jinja, WTForms, Jquery, Bootstrap, Bcrypt and many others.
+Technology used: **Flask, SQLAlchemy, Jinja, WTForms, Jquery, Bootstrap, Bcrypt and many others.**
 
-The following languages were used Python, SQL, Javascript, HTML, and CSS.
+Languages user: 
+- Python
+- SQL 
+- Javascript
+- HTML
+- CSS

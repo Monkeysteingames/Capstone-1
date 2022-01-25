@@ -16,7 +16,8 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
-    avatar_img = db.Column(db.String)
+    avatar_img = db.Column(
+        db.String, default="https://st2.depositphotos.com/1341440/7182/v/600/depositphotos_71824861-stock-illustration-chef-hat-vector-black-silhouette.jpg")
     bio = db.Column(db.String)
 
     def __repr__(self):

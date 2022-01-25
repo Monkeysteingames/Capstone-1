@@ -1,12 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-<div>
-    <h2>Not sure what to cook?</h2>
-    <p>Create an account and start selecting the type of things you have in your fridge or pantry and lets check out
-        what
-        you can make!</p>
-    <a href="/signup">Sign Up</a>
-    <p>Already have an account?</p>
-    <a href="/login">Login</a>
-</div>
-{% endblock %}
+<div class="d-flex justify-content-center">
+    <div class="card text-center mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="https://st2.depositphotos.com/1341440/7182/v/600/depositphotos_71824861-stock-illustration-chef-hat-vector-black-silhouette.jpg"
+                    class="img-fluid rounded-start" alt="chef-hat-img">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">Not sure what to cook? Get Started!</h5>
+                    <a class="btn btn-primary" href="/signup">Sign up</a>
+                    <p class="card-text">Already have an account?
+                        <a class="btn btn-primary" href="/login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
