@@ -3,8 +3,8 @@
 <div class="container">
     <div class="row">
         <!-- User avatar -->
-        <div class="col" id="avatarCol">
-            <div class="card" style="width: 18rem;">
+        <div class="col" id="leftCol">
+            <div class="card" style="width: 22rem;">
                 <img src="{{g.user.avatar_img}}" class="rounded" alt="users avatar image">
                 <div class="card-body">
                     <h5 class="card-title">{{g.user.username}}</h5>
@@ -24,23 +24,7 @@
                         </svg></a>
                 </div>
             </div>
-        </div>
-        <div class="col text-center" id="recipeCol">
-            {% if fridge %}
-            <!-- Fridge Search -->
-            <h2>Discover more dishes.</h2>
-            <div class="p-3">
-                <form class="recipeSearchForm">
-                    <button class="btn btn-success p-2" type="button" id="rcpFridgeSearch">Search by ingredients in
-                        fridge</button>
-                </form>
-                <div class="p-4" id="recipeResults">
-                    <!-- Show recipe results here -->
-                </div>
-            </div>
-        </div>
-        <div class="col text-center">
-            <div style="width: 18rem;">
+            <div class="text-center p-3" style="width: 22rem;">
                 <h5>Currently in fridge:</h5>
                 <!-- Button trigger modal -->
                 <button type="button" id="fridgeModalButton" class="btn btn-primary" data-toggle="modal"
@@ -56,6 +40,20 @@
                     </li>
                     {% endfor %}
                 </ul>
+            </div>
+        </div>
+        <div class="col text-center" id="recipeCol">
+            {% if fridge %}
+            <!-- Fridge Search -->
+            <h2>Discover more dishes.</h2>
+            <div class="p-3">
+                <form class="recipeSearchForm">
+                    <button class="btn btn-success p-2" type="button" id="rcpFridgeSearch">Search by ingredients in
+                        fridge</button>
+                </form>
+                <div class="p-2" id="recipeResults">
+                    <!-- Show recipe results here -->
+                </div>
             </div>
         </div>
         <!-- Modal -->
