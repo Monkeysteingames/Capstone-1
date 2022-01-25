@@ -20,7 +20,7 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
-ENV = 'dev'
+ENV = 'prod'
 
 if ENV == 'dev':
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///cookwhat"
