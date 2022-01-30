@@ -8,6 +8,10 @@ https://spoonacular.com/food-api
 
 --------
 
+Linke to website: https://cook-what.herokuapp.com/
+
+--------
+
 This website is designed to help users see the potential recipes they can craft from ingredients they already have in their homes. Most people who don't cook often or even those who do still may not realize the infinite possibilites when it comes to coooking.
 
 Cook What simply allows user to create a "fridge" when logged-in and add in ingredients they have in there home. 
